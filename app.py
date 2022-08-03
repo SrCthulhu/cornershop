@@ -98,11 +98,9 @@ def cart_view():
             cart[storeId]['products'] = []
         cart[storeId]['products'].append(p)
 
-    store = db.stores.find_one({'_id': ObjectId(productos[0]['store_id'])})
     return render_template(
         "carro_detalle.html",
         productos=productos,
-        store=store,
         cart=cart,
     )
 
