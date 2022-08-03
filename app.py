@@ -60,7 +60,16 @@ def add_product_to_cart(store_id, product_id):
         return redirect('/')
 
     user = session.get('id')
-
+    cartproduct = db.cart.find_one(
+        {'title': product['title'], 'user_id': user})
+    if cartproduct:
+        db.cart.update_one(
+            {'title': product['title'], 'user_id': user},
+            {'$set':
+                {'cantidad': cartproduct['cantidad'] + 1}
+             }
+        )
+        return redirect('/cart')
     nuevo = {}
     nuevo['title'] = product['title']
     nuevo['img'] = product['img']
@@ -96,3 +105,9 @@ def cart_view():
         store=store,
         cart=cart,
     )
+
+
+@app.route("/remove/<id>")
+def remove_to_cart(id):
+    db.cart.delete_one({'_id': ObjectId(id)})
+    return redirect('/cart')
