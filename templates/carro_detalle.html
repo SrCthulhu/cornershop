@@ -37,16 +37,20 @@
                     <h6>Buenos Aires, Argentina</h6>
                 </div>
                 <hr>
-
-                <div class="col-1">
-                    <img class="img-fluid" src="{{store['img']}}" width="50" height="50" alt="">
-                </div>
-                <div class="text-center col-1">
-                    <h6>{{store['name']}}</h6>
-                </div>
             </div>
             <div class="row">
-                {% for p in productos %}
+                {% for key, line in cart.items() %}
+                <div class="col-12">
+                    <div class="row">
+                        <div class="col-1">
+                            <img class="img-fluid" src="{{line['store']['img']}}" width="50" height="50" alt="">
+                        </div>
+                        <div class="text-center col-1">
+                            <h6>{{line['store']['name']}}</h6>
+                        </div>
+                    </div>
+                </div>
+                {% for p in line['products'] %}
                 <div class="py-3 cuadrados text-center col-1">
                     <h6>1 Un</h6>
                 </div>
@@ -61,6 +65,7 @@
                     </div>
                 </div>
 
+                {% endfor %}
                 {% endfor %}
 
                 <div class="py-3 cuadrados text-center col-1">

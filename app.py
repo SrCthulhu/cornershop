@@ -78,9 +78,21 @@ def cart_view():
         return redirect('/')
     user = session.get('id')
     productos = list(db.cart.find({'user_id': user}))
+
+    cart = {}
+    for p in productos:
+        storeId = p['store_id']
+        if not storeId in cart:
+            cart[storeId] = {}
+            cart[storeId]['store'] = db.stores.find_one(
+                {'_id': ObjectId(storeId)})
+            cart[storeId]['products'] = []
+        cart[storeId]['products'].append(p)
+
     store = db.stores.find_one({'_id': ObjectId(productos[0]['store_id'])})
     return render_template(
         "carro_detalle.html",
         productos=productos,
         store=store,
+        cart=cart,
     )
