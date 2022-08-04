@@ -18,6 +18,7 @@
 
 <body>
     <section>
+
         <form class="container">
             <div class="row py-5 cuadrados">
                 <div class="col-4">
@@ -84,29 +85,32 @@
                 <div class="col-12 py-3 cuadrados">
                     <h5 style="color: red;">Resumen de tu pedido</h5>
                 </div>
+                {% for c in cartproducts %}
                 <div class="col-6 text-end">
-                    <h6><strong>Nombre de la tienda</strong></h6>
+                    <h6><strong>{{c['title']}}</strong></h6>
                 </div>
                 <div class="col-6">
-                    <h6>Precio del producto del carrito</h6>
+                    <h6>{{c['price']}} $ARS</h6>
+
                 </div>
+                {% endfor %}
                 <div class="col-6 text-end">
-                    <h6><strong>Cupón de descuento</strong></h6>
+                    <h6 style="color: red;">Cupón de descuento:</h6>
                 </div>
                 <div class="col-6">
                     <h6>Precio con cupón</h6>
                 </div>
                 <div class="col-6 text-end">
-                    <h6>Subtotal</h6>
+                    <h6>Subtotal:</h6>
                 </div>
                 <div class="col-6">
-                    <h6>Monto del subtotal</h6>
+                    <h6>{{subtotal}} $ARS</h6>
                 </div>
                 <div class="col-6 text-end">
-                    <h5 style="color: red;">Total</h5>
+                    <h5 style="color: red;">Total:</h5>
                 </div>
                 <div class="col-6">
-                    <h6>Suma Final</h6>
+                    <h6>{{total}} $ARS</h6>
                 </div>
                 <div class="col d-grid gap-1 py-3">
                     <button type="button" class="btn btn-danger">Pagar orden</button>

@@ -113,5 +113,15 @@ def remove_to_cart(id):
 
 @app.route("/checkout")
 def check_view():
-
-    return render_template("checkout.html")
+    user = session.get('id')
+    cartproducts = list(db.cart.find({'user_id': user}))
+    subtotal = 0
+    for p in cartproducts:
+        price = p['price']
+        subtotal = subtotal + (int(price) * p['cantidad'])
+    total = subtotal
+    return render_template("checkout.html",
+                           cartproducts=cartproducts,
+                           subtotal=subtotal,
+                           total=total,
+                           )
