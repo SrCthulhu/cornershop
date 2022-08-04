@@ -109,3 +109,9 @@ def cart_view():
 def remove_to_cart(id):
     db.cart.delete_one({'_id': ObjectId(id)})
     return redirect('/cart')
+
+
+@app.route("/checkout")
+def check_view():
+
+    return render_template("checkout.html")

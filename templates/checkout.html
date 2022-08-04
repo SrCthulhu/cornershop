@@ -1,0 +1,119 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.2.0-beta1/dist/css/bootstrap.min.css" rel="stylesheet"
+        integrity="sha384-0evHe/X+R7YkIZDRvuzKMRqM+OrBnVFBL6DOitfPri4tjfHxaWutUpFmBp4vmVor" crossorigin="anonymous">
+    <link rel="icon" href="https://apprecs.org/ios/images/app-icons/256/a3/995060131.jpg">
+    <style type="text/css">
+        .cuadrados {
+            outline: 1px solid #d0d0d0;
+        }
+    </style>
+    <title>Checkout | Cornershop</title>
+</head>
+
+<body>
+    <section>
+        <form class="container">
+            <div class="row py-5 cuadrados">
+                <div class="col-4">
+                    <a href="/cart" class="text-decoration-none" style="color: red;">
+                        <h5>⬅ Carro</h5>
+                    </a>
+                </div>
+                <div class="col-4 text-center">
+                    <h4>Confirmación</h4>
+                </div>
+                <div class="col-4 text-end">
+                    <a href="/tiendas" type="button" class="btn-close" aria-label="Close"></a>
+                </div>
+            </div>
+            <div class="row cuadrados">
+                <div class="col py-4">
+                    <label for="exampleFormControlInput1" class="form-label">
+                        <h6>NOMBRE*</h6>
+                    </label>
+                    <input type="first_name" class="form-control" id="exampleFormControlInput1"
+                        placeholder="Cthulhu (nombre regular)" name="first_name">
+                    <label for="exampleFormControlInput1" class="form-label pt-3">
+                        <h6>APELLIDO*</h6>
+                    </label>
+                    <input type="last_name" class="form-control" id="exampleFormControlInput1"
+                        placeholder="Primigenio (apellido regular)" name="last_name">
+                    <label for="exampleFormControlInput1" class="form-label pt-3">
+                        <h6>DIRECCIÓN*</h6>
+                    </label>
+                    <input type="address" class="form-control" id="exampleFormControlInput1"
+                        placeholder="New york/ United States" name="address">
+                    <label for="exampleFormControlInput1" class="form-label pt-3">
+                        <h6>NOTA*</h6>
+                    </label>
+                    <input type="nota" class="form-control" id="exampleFormControlInput1"
+                        placeholder="Esquina con / Paralela / Color" name="nota">
+                    <label for="exampleFormControlInput1" class="form-label pt-3">
+                        <h6>MÉTODO DE PAGO*</h6>
+                    </label>
+                    <input type="paymentmethod" class="form-control" id="exampleFormControlInput1"
+                        placeholder="Crédito / Débito / Efectivo" name="paymentmethod">
+                    <label for="exampleFormControlInput1" class="form-label pt-3">
+                        <h6>TELÉFONO*</h6>
+                    </label>
+                    <input type="phone" class="form-control" id="exampleFormControlInput1" placeholder="+54 9 11 ****"
+                        name="phone">
+                    <label for="exampleFormControlInput1" class="form-label pt-3">
+                        <h6>CUPÓN DE DESCUENTO*</h6>
+                    </label>
+                    <input type="cupon" class="form-control" id="exampleFormControlInput1"
+                        placeholder="Ingresa el código" name="cupon">
+                </div>
+                <div class="col-12 py-3 cuadrados">
+                    <h5 style="color: red;">Propina de tu Shopper</h5>
+                </div>
+                <div class="col text-center">
+                    <button type="button" class="btn btn-dark btn-lg">No ahora</button>
+                    <button type="button" class="btn btn-dark btn-lg">100 $ARS</button>
+                    <button type="button" class="btn btn-dark btn-lg">500 $ARS</button>
+                    <button type="button" class="btn btn-dark btn-lg">1000 $ARS</button>
+                    <button type="button" class="btn btn-dark btn-lg">5000 $ARS</button>
+                    <button type="button" class="btn btn-dark btn-lg">10000 $ARS</button>
+                </div>
+                <div class="col-12 py-3 cuadrados">
+                    <h5 style="color: red;">Resumen de tu pedido</h5>
+                </div>
+                <div class="col-6 text-end">
+                    <h6><strong>Nombre de la tienda</strong></h6>
+                </div>
+                <div class="col-6">
+                    <h6>Precio del producto del carrito</h6>
+                </div>
+                <div class="col-6 text-end">
+                    <h6><strong>Cupón de descuento</strong></h6>
+                </div>
+                <div class="col-6">
+                    <h6>Precio con cupón</h6>
+                </div>
+                <div class="col-6 text-end">
+                    <h6>Subtotal</h6>
+                </div>
+                <div class="col-6">
+                    <h6>Monto del subtotal</h6>
+                </div>
+                <div class="col-6 text-end">
+                    <h5 style="color: red;">Total</h5>
+                </div>
+                <div class="col-6">
+                    <h6>Suma Final</h6>
+                </div>
+                <div class="col d-grid gap-1 py-3">
+                    <button type="button" class="btn btn-danger">Pagar orden</button>
+                </div>
+            </div>
+        </form>
+    </section>
+</body>
+
+</html>
