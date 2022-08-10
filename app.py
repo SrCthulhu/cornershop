@@ -98,10 +98,12 @@ def cart_view():
             cart[storeId]['products'] = []
         cart[storeId]['products'].append(p)
 
+    mensaje = request.args.get('mensaje')
     return render_template(
         "carro_detalle.html",
         productos=productos,
         cart=cart,
+        mensaje=mensaje
     )
 
 
@@ -116,12 +118,99 @@ def check_view():
     user = session.get('id')
     cartproducts = list(db.cart.find({'user_id': user}))
     subtotal = 0
+
+    couponId = session.get('coupon_id')
+    coupon = db.coupons.find_one({'_id': ObjectId(couponId)})
+
     for p in cartproducts:
         price = p['price']
         subtotal = subtotal + (int(price) * p['cantidad'])
-    total = subtotal
+
+    descuento = 0
+
+    if coupon:
+        descuento = subtotal * float(coupon['discount'])
+
+    total = subtotal - descuento
+
+    mensaje = request.args.get('mensaje')
     return render_template("checkout.html",
                            cartproducts=cartproducts,
                            subtotal=subtotal,
                            total=total,
-                           )
+                           mensaje=mensaje,
+                           descuento=descuento,
+                           coupon=coupon)
+
+
+@app.route("/order/create")
+def order_created_view():
+    # nombre del input documento del checkout.html
+    firstName = request.args.get('first_name')
+    lastName = request.args.get('last_name')
+    address = request.args.get('address')
+    nota = request.args.get('nota')
+    email = request.args.get('email')
+    phone = request.args.get('phone')
+    cupon = request.args.get('cupon')
+    total = request.args.get('total')
+    propina = request.args.get('propina')
+
+    if firstName == "" or lastName == "" or address == "" or phone == "" or nota == "" or email == "" or cupon == "" or total == "" or propina == "":
+        return redirect('/checkout?mensaje=tienes campos vacios')
+
+    emailSplitted = email.split('@')
+    if len(emailSplitted) != 2 or emailSplitted[1] != 'gmail.com':
+
+        return redirect('/checkout?mensaje=la direccion de correo no es valida')
+
+    user = session.get('id')
+    cartproducts = list(db.cart.find({'user_id': user}))
+
+    pedido = {}
+    pedido['client'] = {
+        'first_name': firstName,
+        'last_name': lastName,
+        'address': address,
+        'nota': nota,
+        'email': email,
+        'phone': phone,
+        'cupon': cupon
+    }
+
+    pedido['user_id'] = user
+    pedido['cart'] = cartproducts
+    pedido['total'] = total
+    pedido['propina'] = propina
+    orderCreated = db.orders.insert_one(pedido)
+    orderId = orderCreated.inserted_id
+
+    db.cart.delete_many({'user_id': user})
+    db.session.delete_many({'coupon_id': user})
+    return redirect('/order/' + str(orderId))
+
+
+@app.route("/order/<id>")
+def order_view(id):
+    pedido = db.orders.find_one({'_id': ObjectId(id)})
+
+    return render_template("order_created.html", pedido=pedido)
+
+
+@app.route("/coupon/apply")
+def apply_coupon():
+    # nombre del input documento del checkout.html
+    couponCode = request.args.get('cupon')
+
+    if couponCode == "":
+        return redirect('/cart?mensaje=El campo cupon no puede estar vacio')
+
+    coupon = db.coupons.find_one({'code': couponCode})
+
+    if not coupon:
+        return redirect('/cart?mensaje=El cupon no existe')
+
+    # MAGIA
+    session['coupon_id'] = str(coupon['_id'])
+
+    return redirect('/cart')
