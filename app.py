@@ -214,3 +214,11 @@ def apply_coupon():
     session['coupon_id'] = str(coupon['_id'])
 
     return redirect('/cart')
+
+
+@app.route("/order_list")
+def order_detalle_view():
+
+    ordenes = list(db.orders.find())
+
+    return render_template("order_detalle.html", ordenes=ordenes)
