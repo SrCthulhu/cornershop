@@ -182,6 +182,7 @@ def order_created_view():
     pedido['cart'] = cartproducts
     pedido['total'] = total
     pedido['propina'] = propina
+    pedido['status'] = 'paid'
     orderCreated = db.orders.insert_one(pedido)
     orderId = orderCreated.inserted_id
 
@@ -219,6 +220,30 @@ def apply_coupon():
 @app.route("/order_list")
 def order_detalle_view():
 
-    ordenes = list(db.orders.find())
+    # .sort() sirve para ordenar elementos con el criterio, en este caso con el id de forma descendente (del ultimo creado al primero)
+    ordenes = list(db.orders.find().sort('_id', -1))
 
     return render_template("order_detalle.html", ordenes=ordenes)
+
+# Actualizar Estado de una orden!!!
+
+
+@app.route("/order/next/status/<id>")
+def order_next_status(id):
+
+    pedido = db.orders.find_one({'_id': ObjectId(id)})
+    # status= se refiere al valor que tenga el pedido en la actualidad.
+    status = pedido['status']
+
+    if pedido['status'] == 'paid':
+        # se cumple la condicion y se reemplaza el valor del status. de 'paid' a 'delivered'
+        status = 'delivered'
+    elif pedido['status'] == 'delivered':
+        status = 'finished'
+
+    db.orders.update_one(
+        {'_id': ObjectId(id)},
+        {'$set': {'status': status}}
+    )
+    # recargamos order list con darle continuar.
+    return redirect('/order_list')

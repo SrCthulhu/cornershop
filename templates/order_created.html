@@ -12,6 +12,10 @@
         .cuadrados {
             outline: 1px solid #d0d0d0;
         }
+
+        .inactive {
+            opacity: 0.2;
+        }
     </style>
     <title>Order | Cornershop</title>
 </head>
@@ -43,7 +47,8 @@
                         <h5>Pagado</h5>
                     </div>
                 </div>
-                <div class="col-4 text-center">
+                <!-- con la condición if el estado del pedido si está 'paid se mostrará inactivo o delivered'-->
+                <div class="col-4 text-center {% if pedido['status']=='paid' %}inactive{% endif %}">
                     <img width="150" height="150"
                         src="https://www.vansdirect.co.uk/wp-content/uploads/2017/01/icon-delivery.png" alt="">
                     <div class="pt-3">
@@ -51,7 +56,8 @@
                     </div>
 
                 </div>
-                <div class="col-4">
+                <div
+                    class="col-4 {% if pedido['status']=='paid' or pedido['status']=='delivered' %}inactive{% endif %}">
                     <img width="150" height="150"
                         src="https://cdn2.iconfinder.com/data/icons/shipping-and-delivery-solid-collection/60/15_-_Shipping_and_Delivery_-_Solid_-_Delivered_Package-512.png"
                         alt="">

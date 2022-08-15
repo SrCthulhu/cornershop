@@ -61,6 +61,7 @@
                             <th>Total</th>
                             <th>Cantidad</th>
                             <th>Ver</th>
+                            <th>Estado</th>
                             <th>Acción</th>
                         </tr>
                         {% for x in ordenes %}
@@ -72,7 +73,13 @@
                                 <!--Forma de imprimir cantidades de una lista en jinja-->
                             </td>
                             <td><a href="/order/{{x['_id']}}">ver</a></td>
-                            <td><button type="submit" class="btn btn-dark">Continuar</button></td>
+                            <td>{{x['status']}}</td>
+                            <td>
+                                {%if x['status'] != 'finished' %}
+                                <!--si no está terminada muesta el boton.-->
+                                <a href="/order/next/status/{{x['_id']}}" class="btn btn-dark">Continuar</a>
+                                {%endif%}
+                            </td>
                         </tr>
                         {% endfor %}
                     </table>
