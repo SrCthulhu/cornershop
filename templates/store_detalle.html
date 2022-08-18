@@ -65,10 +65,12 @@
                 {% for f in frutas %}
 
                 <div id="cuadrados" class="text-center col-2">
-                    <img class="img-fluid" src="{{f['img']}}" alt="">
-                    <h6>{{f['title']}}</h6>
-                    <small>{{f['price']}}</small>
-                    <p class="text-secondary">{{f['parrafo']}}</p>
+                    <a class="text-decoration-none text-dark" href="/producto/{{f['_id']}}">
+                        <img class="img-fluid" src="{{f['img']}}" alt="">
+                        <h6>{{f['title']}}</h6>
+                        <small>{{f['price']}}</small>
+                        <p class="text-secondary">{{f['parrafo']}}</p>
+                    </a>
                     <a href="/cart/add/{{f['store_id']}}/{{f['_id']}}" class="btn btn-outline-dark">{{f['button']}}</a>
                 </div>
                 {% endfor %}

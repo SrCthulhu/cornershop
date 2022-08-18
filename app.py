@@ -1,4 +1,4 @@
-from flask import Flask, render_template, redirect, session, request
+from flask import Flask, render_template, redirect, session, request, abort
 from pymongo import MongoClient
 from bson.objectid import ObjectId
 import os
@@ -71,6 +71,7 @@ def add_product_to_cart(store_id, product_id):
         )
         return redirect('/cart')
     nuevo = {}
+    nuevo['product_id'] = product_id
     nuevo['title'] = product['title']
     nuevo['img'] = product['img']
     nuevo['price'] = product['price']
@@ -187,8 +188,12 @@ def order_created_view():
     orderId = orderCreated.inserted_id
 
     db.cart.delete_many({'user_id': user})
-    db.session.delete_many({'coupon_id': user})
+    # session.pop sirve para borrar la variable de sesion.
+    session.pop('coupon_id')
+    # pero nos está sirviendo para que no le siga aplicando el cupon despues de haber creado la orden.
     return redirect('/order/' + str(orderId))
+
+    # tarea aplicar un cupon una sola vez por usuario en una orden, en la segunda orden no pueda.
 
 
 @app.route("/order/<id>")
@@ -247,3 +252,59 @@ def order_next_status(id):
     )
     # recargamos order list con darle continuar.
     return redirect('/order_list')
+
+
+@app.route("/comentario/order/<id>")
+def comentario_view(id):
+
+    pedido = db.orders.find_one({'_id': ObjectId(id)})
+
+    if (not pedido):
+        return abort(404)
+
+    return render_template("comentario_detalle.html",
+                           pedido=pedido,
+                           )
+
+
+@app.route("/comment/create")
+def comment_create():
+    commentText = request.args.get('comment')
+    productId = request.args.get('product_id')
+    orderId = request.args.get('order_id')
+
+    pedido = db.orders.find_one({'_id': ObjectId(orderId)})
+
+    comment = {}
+    comment['comment'] = commentText
+    comment['order_id'] = orderId
+    comment['product_id'] = productId
+
+    firstName = pedido['client']['first_name']
+    lastName = pedido['client']['last_name']
+
+    comment['client_full_name'] = f'{firstName} {lastName}'
+
+    db.comments.insert_one(comment)
+
+    # hacer la voladera de culo (#comment-123)
+    return redirect('/producto/' + productId)
+
+
+@app.route("/producto/<id>")
+def producto_view(id):
+    product = db.frutas.find_one({'_id': ObjectId(id)})
+    if (not product):
+        return abort(404)
+
+    comments = db.comments.find({'product_id': id})
+
+    return render_template("producto_detalle.html", product=product, comments=comments)
+
+# Tarea: solo se puede agregar un comentario por orden de un producto. Ejemplo. una orden, se compra un tomate/ una cebolla
+# solo se puede hacer un comentario del tomate por esa orden y solo se puede hacer un comentario de la cebolla por esa orden.
+# Adicional: Se mostrará un mensaje de (ya se hizo un comentario de ese producto)
+
+# Tarea: Hacer login de administrador para que solamente los administradores puedan acceder a la vista de order_list.html
+# crear coleccion[admins]
+# Subtarea: hacer vista de logeo, mensaje de alerta cuando el admin sea invalido.
