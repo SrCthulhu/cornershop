@@ -99,12 +99,14 @@ def cart_view():
             cart[storeId]['products'] = []
         cart[storeId]['products'].append(p)
 
-    mensaje = request.args.get('mensaje')
+    mensaje1 = request.args.get('mensaje1')
+    mensaje2 = request.args.get('mensaje2')
     return render_template(
         "carro_detalle.html",
         productos=productos,
         cart=cart,
-        mensaje=mensaje
+        mensaje1=mensaje1,
+        mensaje2=mensaje2,
     )
 
 
@@ -135,6 +137,7 @@ def check_view():
     total = subtotal - descuento
 
     mensaje = request.args.get('mensaje')
+
     return render_template("checkout.html",
                            cartproducts=cartproducts,
                            subtotal=subtotal,
@@ -153,11 +156,10 @@ def order_created_view():
     nota = request.args.get('nota')
     email = request.args.get('email')
     phone = request.args.get('phone')
-    cupon = request.args.get('cupon')
     total = request.args.get('total')
     propina = request.args.get('propina')
 
-    if firstName == "" or lastName == "" or address == "" or phone == "" or nota == "" or email == "" or cupon == "" or total == "" or propina == "":
+    if firstName == "" or lastName == "" or address == "" or phone == "" or nota == "" or email == "" or total == "" or propina == "":
         return redirect('/checkout?mensaje=tienes campos vacios')
 
     emailSplitted = email.split('@')
@@ -167,6 +169,24 @@ def order_created_view():
 
     user = session.get('id')
     cartproducts = list(db.cart.find({'user_id': user}))
+    # coupon_id es una variable global creada en #no es magia.
+    cupon_id = session.get('coupon_id')
+
+    cuponDocument = db.coupons.find_one({'_id': ObjectId(cupon_id)})
+    ###################################
+    # cupon = None lo definimos por defecto para que no de error cuando no se encuentre la base de datos el cupon.
+    # o cuando no haya nada en la variable de sesion.('coupon_id')
+    cupon = None
+    if cuponDocument:  # es True siempre que consiga el documento.
+        # si trajo un documento el valor del code se le aplica a la variable cupon.
+        cupon = cuponDocument['code']
+    ###################################
+
+    orderExist = db.orders.find_one(
+        {'client.cupon': cupon, 'client.email': email})
+    if orderExist:
+        session.pop('coupon_id')
+        return redirect('/checkout?mensaje=Este cupon ya fue aplicado')
 
     pedido = {}
     pedido['client'] = {
@@ -189,11 +209,10 @@ def order_created_view():
 
     db.cart.delete_many({'user_id': user})
     # session.pop sirve para borrar la variable de sesion.
-    session.pop('coupon_id')
+    if session.get('coupon_id'):
+        session.pop('coupon_id')
     # pero nos está sirviendo para que no le siga aplicando el cupon despues de haber creado la orden.
     return redirect('/order/' + str(orderId))
-
-    # tarea aplicar un cupon una sola vez por usuario en una orden, en la segunda orden no pueda.
 
 
 @app.route("/order/<id>")
@@ -209,21 +228,26 @@ def apply_coupon():
     couponCode = request.args.get('cupon')
 
     if couponCode == "":
-        return redirect('/cart?mensaje=El campo cupon no puede estar vacio')
+        return redirect('/cart?mensaje1=El campo cupón no puede estar vacio')
 
     coupon = db.coupons.find_one({'code': couponCode})
 
     if not coupon:
-        return redirect('/cart?mensaje=El cupon no existe')
+        return redirect('/cart?mensaje1=El cupón no existe')
 
-    # MAGIA
+    # NO ES MAGIA
     session['coupon_id'] = str(coupon['_id'])
 
-    return redirect('/cart')
+    # caso exitoso
+    return redirect('/cart?mensaje2=El cupón fue aplicado exitosamente')
 
 
 @app.route("/order_list")
 def order_detalle_view():
+
+    # restringimos el acceso al order_list aunque tenga una sesion iniciada con la variable 'admin'
+    if not session.get('admin'):
+        return redirect('/')
 
     # .sort() sirve para ordenar elementos con el criterio, en este caso con el id de forma descendente (del ultimo creado al primero)
     ordenes = list(db.orders.find().sort('_id', -1))
@@ -301,10 +325,34 @@ def producto_view(id):
 
     return render_template("producto_detalle.html", product=product, comments=comments)
 
-# Tarea: solo se puede agregar un comentario por orden de un producto. Ejemplo. una orden, se compra un tomate/ una cebolla
-# solo se puede hacer un comentario del tomate por esa orden y solo se puede hacer un comentario de la cebolla por esa orden.
-# Adicional: Se mostrará un mensaje de (ya se hizo un comentario de ese producto)
 
-# Tarea: Hacer login de administrador para que solamente los administradores puedan acceder a la vista de order_list.html
-# crear coleccion[admins]
-# Subtarea: hacer vista de logeo, mensaje de alerta cuando el admin sea invalido.
+@app.route("/login")
+def login_view():
+    mensaje = request.args.get('mensaje')
+    return render_template("login.html", mensaje=mensaje)
+
+
+@app.route("/login/admins")
+def login_admins():
+    adminUser = request.args.get('user')
+    adminPassword = request.args.get('password')
+
+    if adminUser == "":
+        return redirect('/login?mensaje=Ingresa el usuario')
+
+    if adminPassword == "":
+        return redirect('/login?mensaje=Ingresa la contraseña')
+
+    adminDocument = db.admins.find_one({'user': adminUser})
+
+    if not adminDocument:
+        return redirect('/login?mensaje=El usuario no existe')
+    # adminpassword en este caso compara el documento en base de datos 'password' que sea igual al del formulario, si no es igual dispara mensaje de error
+    if adminDocument['password'] != adminPassword:
+
+        return redirect('/login?mensaje=La contraseña no es válida')
+
+    # 'id' del admin en la base de datos admins, le damos el valor a sesion['admin']
+    session['admin'] = adminDocument['_id']
+    # caso positivo del if entra en el detalle solicitado.
+    return redirect('/order_list')
