@@ -185,8 +185,10 @@ def order_created_view():
     orderExist = db.orders.find_one(
         {'client.cupon': cupon, 'client.email': email})
     if orderExist:
-        session.pop('coupon_id')
-        return redirect('/checkout?mensaje=Este cupon ya fue aplicado')
+        # Cuando sea diferente a none se aplica el redirect. ejemplo cupon 'code'= hola. Cuando sea none el va a crear la orden aunque otra orden none exista
+        if cupon != None:
+            session.pop('coupon_id', None)
+            return redirect('/checkout?mensaje=Este cupon ya fue aplicado')
 
     pedido = {}
     pedido['client'] = {
@@ -208,9 +210,10 @@ def order_created_view():
     orderId = orderCreated.inserted_id
 
     db.cart.delete_many({'user_id': user})
+
     # session.pop sirve para borrar la variable de sesion.
     if session.get('coupon_id'):
-        session.pop('coupon_id')
+        session.pop('coupon_id', None)
     # pero nos está sirviendo para que no le siga aplicando el cupon despues de haber creado la orden.
     return redirect('/order/' + str(orderId))
 
@@ -286,8 +289,11 @@ def comentario_view(id):
     if (not pedido):
         return abort(404)
 
+    mensaje1 = request.args.get('mensaje1')
+
     return render_template("comentario_detalle.html",
                            pedido=pedido,
+                           mensaje1=mensaje1
                            )
 
 
@@ -309,30 +315,34 @@ def comment_create():
 
     comment['client_full_name'] = f'{firstName} {lastName}'
 
-    db.comments.insert_one(comment)
+    existComment = db.comments.find_one(
+        {'order_id': orderId, 'product_id': productId})
 
-    # hacer la voladera de culo (#comment-123)
-    return redirect('/producto/' + productId)
+    if existComment:
+        return redirect('/comentario/order/' + orderId + '?mensaje1=Ya se hizo un comentario de ese producto')
+
+    # inserted_id te indica el id insertado del nuevo documento
+    commentCreatedId = db.comments.insert_one(comment).inserted_id
+
+    return redirect('/producto/' + productId + '#comment-' + str(commentCreatedId))
 
 
-@app.route("/producto/<id>")
+@ app.route("/producto/<id>")
 def producto_view(id):
     product = db.frutas.find_one({'_id': ObjectId(id)})
     if (not product):
         return abort(404)
-
     comments = db.comments.find({'product_id': id})
-
     return render_template("producto_detalle.html", product=product, comments=comments)
 
 
-@app.route("/login")
+@ app.route("/login")
 def login_view():
     mensaje = request.args.get('mensaje')
     return render_template("login.html", mensaje=mensaje)
 
 
-@app.route("/login/admins")
+@ app.route("/login/admins")
 def login_admins():
     adminUser = request.args.get('user')
     adminPassword = request.args.get('password')
@@ -353,6 +363,6 @@ def login_admins():
         return redirect('/login?mensaje=La contraseña no es válida')
 
     # 'id' del admin en la base de datos admins, le damos el valor a sesion['admin']
-    session['admin'] = adminDocument['_id']
+    session['admin'] = str(adminDocument['_id'])
     # caso positivo del if entra en el detalle solicitado.
     return redirect('/order_list')

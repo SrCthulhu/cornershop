@@ -13,6 +13,14 @@
         .cuadrados {
             outline: 1px solid #d0d0d0;
         }
+
+        .comment {
+            background-color: #fff;
+        }
+
+        .comment:target {
+            background-color: #ffa;
+        }
     </style>
 </head>
 
@@ -52,7 +60,7 @@
                         <h3 style="color: red;" class="text-center">Comentarios</h3>
 
                         {% for comment in comments %}
-                        <div style="background-color: #fff;" class="mb-2 cuadrados rounded p-2">
+                        <div class="mb-2 cuadrados rounded p-2 comment" id="comment-{{comment['_id']}}">
                             <div class="row">
                                 <div class="col-2">
                                     <img class="img-fluid rounded-circle"
